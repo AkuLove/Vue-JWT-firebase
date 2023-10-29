@@ -1,0 +1,9 @@
+@import 'styles/null';
+@import 'styles/mixins';
+
+[class*='container'] {
+  max-width: 1240px;
+  box-sizing: content-box;
+  margin: 0 auto;
+  padding: 0 15px;
+}

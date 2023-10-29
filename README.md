@@ -1,1 +1,0 @@
-# Vue-JWT-firebase
