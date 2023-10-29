@@ -1,15 +1,16 @@
 <template>
-  <div>
-    <MainNavbar />
+  <MainHeader />
+  <main>
     <RouterView />
-  </div>
+  </main>
+  <footer></footer>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import MainNavbar from './components/mainNavbar.vue';
+import MainHeader from './components/MainHeader.vue';
 
-export default defineComponent({ components: { MainNavbar } });
+export default defineComponent({ components: { MainHeader } });
 </script>
 
 <style lang="scss" scoped></style>
