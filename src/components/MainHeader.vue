@@ -3,18 +3,29 @@
     <div class="container">
       <div class="buttons">
         <button type="button" @click="$router.push('/')">Home</button>
+        <button type="button" @click="$router.push('/cars')">Cars</button>
         <button type="button" @click="$router.push('/registration')">
           Registration
         </button>
+        <button type="button" @click="$router.push('/signin')">Sign in</button>
+        <button type="button" @click="logout">Logout</button>
       </div>
     </div>
   </header>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
-export default defineComponent({});
+const router = useRouter();
+const authStore = useAuthStore();
+
+const logout = () => {
+  authStore.logout();
+  localStorage.removeItem('userTokens');
+  router.push('/signin');
+};
 </script>
 
 <style lang="scss" scoped>

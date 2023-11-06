@@ -1,11 +1,12 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { ISignUp } from '../types/ISignUp';
 import { ISignUpResponse } from '../types/ISignUpResponse';
 import { ISignUpError } from '../types/ISignUpError';
+import axiosApiInstance from '../api';
 
-const API_KEY = 'AIzaSyDeXYh-N9ZcysjHx3inkV2zH1OwgaquY-c';
+const API_KEY = import.meta.env.VITE_API_KEY_FIREBASE;
 
 export const useAuthStore = defineStore('authStore', () => {
   const userInfo = ref({
@@ -18,12 +19,15 @@ export const useAuthStore = defineStore('authStore', () => {
   const errorMessage = ref('');
   const loader = ref(false);
 
-  const signUp = async (payload: ISignUp) => {
+  const auth = async (
+    payload: ISignUp,
+    type: 'signUp' | 'signInWithPassword'
+  ) => {
     errorMessage.value = '';
     loader.value = true;
     try {
-      const response = await axios.post<ISignUpResponse>(
-        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+      const response = await axiosApiInstance.post<ISignUpResponse>(
+        `https://identitytoolkit.googleapis.com/v1/accounts:${type}?key=${API_KEY}`,
         {
           ...payload,
           returnSecureToken: true,
@@ -36,7 +40,13 @@ export const useAuthStore = defineStore('authStore', () => {
         refreshToken: response.data.refreshToken,
         expiresIn: response.data.expiresIn,
       };
-      loader.value = false;
+      localStorage.setItem(
+        'userTokens',
+        JSON.stringify({
+          token: userInfo.value.token,
+          refreshToken: userInfo.value.refreshToken,
+        })
+      );
     } catch (err) {
       const error = err as AxiosError<ISignUpError>;
       switch (error.response?.data.error.message) {
@@ -46,12 +56,33 @@ export const useAuthStore = defineStore('authStore', () => {
         case 'OPERATION_NOT_ALLOWED':
           errorMessage.value = 'Operation not allowed';
           break;
+        case 'INVALID_LOGIN_CREDENTIALS':
+          errorMessage.value = 'Invalid login credentials';
+          break;
+        case 'USER_DISABLED':
+          errorMessage.value = 'User disabled';
+          break;
+        case 'WEAK_PASSWORD':
+          errorMessage.value = 'Password should be at least 6 characters';
+          break;
         default:
           errorMessage.value = 'Error';
           break;
       }
+      throw errorMessage.value;
+    } finally {
       loader.value = false;
     }
   };
-  return { signUp, userInfo, errorMessage, loader };
+
+  const logout = () => {
+    userInfo.value = {
+      token: '',
+      email: '',
+      userId: '',
+      refreshToken: '',
+      expiresIn: '',
+    };
+  };
+  return { auth, userInfo, errorMessage, loader, logout };
 });

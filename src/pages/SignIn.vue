@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h2 class="title">Sign up</h2>
+    <h2 class="title">Sign in</h2>
     <form class="form">
       <span v-if="authStore.errorMessage">{{ authStore.errorMessage }}</span>
       <div>
@@ -16,13 +16,13 @@
         <input v-model="password" type="password" />
       </div>
       <div>
-        <button v-if="authStore.loader" type="button" @click="signUp">
+        <button v-if="authStore.loader" type="button" @click="signIn">
           Loading...
         </button>
-        <button v-else type="button" @click="signUp">Sign up</button>
+        <button v-else type="button" @click="signIn">Sign up</button>
         <p>
-          Are you already registered?
-          <RouterLink to="/signin">Sign in</RouterLink>
+          Are you not registered?
+          <RouterLink to="/registration">Sign up</RouterLink>
         </p>
       </div>
     </form>
@@ -32,16 +32,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useRouter } from 'vue-router';
 
 const email = ref();
 const password = ref();
 const authStore = useAuthStore();
+const router = useRouter();
 
-const signUp = async () => {
+const signIn = async () => {
   await authStore.auth(
     { email: email.value, password: password.value },
-    'signUp'
+    'signInWithPassword'
   );
+  router.push('/cars');
 };
 </script>
 
